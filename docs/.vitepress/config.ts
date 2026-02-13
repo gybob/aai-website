@@ -53,7 +53,6 @@ const specSidebarZh = [
 export default defineConfig({
   title: 'AAI Protocol',
   description: 'Agent App Interface - Open protocol for AI Agents to directly invoke application capabilities',
-  ignoreDeadLinks: false,
 
   head: [
     ['meta', { name: 'theme-color', content: '#3c8cff' }],
