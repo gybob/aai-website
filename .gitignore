@@ -5,9 +5,3 @@ dist
 # VitePress build/cache
 docs/.vitepress/cache
 docs/.vitepress/dist
-
-# Synced from aai-protocol (do not edit here, run sync script instead)
-docs/spec/
-docs/zh-CN/spec/
-docs/public/schema/
-docs/public/examples/
