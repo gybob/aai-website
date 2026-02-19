@@ -2,6 +2,8 @@
 title: AAI Protocol
 ---
 
+# AAI Protocol
+
 <p align="center">
   <img src="/aai-protocol-diagram.png" alt="AAI Protocol" width="600" />
 </p>
@@ -9,8 +11,6 @@ title: AAI Protocol
 <p align="center">
   <strong>An open protocol that makes any application accessible to AI Agents.</strong>
 </p>
-
----
 
 ## Background: The Agent-Software Paradox
 
@@ -28,8 +28,6 @@ Tomorrow's applications will serve two audiences:
 | **AAI** | Agents | Programmatic access, automation, orchestration |
 
 Both interfaces access the same core logic. The GUI remains for humans who prefer visual interaction or need to explore. AAI enables Agents to operate apps on behalf of users—reliably, quickly, and at scale.
-
----
 
 ## The Problem
 
@@ -60,8 +58,6 @@ With AAI:
 
 **One `aai.json` file turns your app from invisible to fully Agent-accessible.**
 
----
-
 ## Who Benefits
 
 ### App Developers -- Make Your App Agent-Ready
@@ -86,8 +82,6 @@ With AAI, users delegate daily work to AI Agents instead of operating applicatio
 - **Faster execution**: Direct communication bypasses visual recognition and mouse simulation overhead
 - **Seamless integration**: Agents orchestrate multiple apps naturally, creating end-to-end workflows
 
----
-
 ## How It Works
 
 1. App provides `aai.json` describing its tools:
@@ -101,32 +95,3 @@ With AAI, users delegate daily work to AI Agents instead of operating applicatio
    - **Web Apps** → JSON over HTTP, Gateway-managed OAuth 2.1 authorization
 
 Both humans (via GUI) and Agents (via AAI) access the same core application logic. Neither interferes with the other.
-
----
-
-## Documentation
-
-### Specification
-
-| Document | Description |
-|----------|-------------|
-| [Architecture](/protocol/architecture) | System architecture, key principles, and data flow |
-| [aai.json Descriptor](/protocol/aai-json) | Descriptor format, structure, and field reference |
-| [Security Model](/protocol/security) | Two-layer authorization: Gateway Consent + App Authorization |
-| [Error Codes](/protocol/error-codes) | Standardized error codes and HTTP status mapping |
-| [Discovery](/protocol/discovery) | On-demand loading via MCP resources |
-
-### Platform Guides
-
-| Platform | Description |
-|----------|-------------|
-| [macOS](/protocol/platforms/macos) | JSON over Apple Events IPC |
-| [Web](/protocol/platforms/web) | JSON over HTTP with OAuth 2.1 |
-
-### User Guides
-
-| Guide | Audience |
-|-------|----------|
-| [For Users](/guide/users) | Using AAI with your AI Agent |
-| [For App Developers](/guide/developers) | Making your app Agent-accessible |
-| [For Gateway Contributors](/guide/contributors) | Contributing to AAI Gateway |

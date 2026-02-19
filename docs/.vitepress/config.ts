@@ -1,6 +1,7 @@
 import { defineConfig } from 'vitepress'
+import { withMermaid } from 'vitepress-plugin-mermaid'
 
-export default defineConfig({
+export default withMermaid(defineConfig({
   title: 'AAI Protocol',
   description: 'An open protocol that makes any application accessible to AI Agents',
 
@@ -77,7 +78,10 @@ export default defineConfig({
       light: 'github-light',
       dark: 'github-dark',
     },
-    mermaid: {},
   },
-})
+
+  mermaid: {
+    theme: 'default',
+  },
+}))
 
