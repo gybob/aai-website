@@ -14,8 +14,8 @@ Before implementing, understand the AAI protocol:
 
 | Resource | Description |
 |----------|-------------|
-| [Protocol Overview](/protocol/) | What is AAI and why it matters |
-| [Protocol Overview](/protocol/) | Full spec index |
+| [Protocol Overview](/) | What is AAI and why it matters |
+| [Protocol Overview](/) | Full spec index |
 | [aai.json Descriptor](../aai-json) | Descriptor format |
 | [Security Model](../security) | Authorization details |
 
@@ -283,4 +283,4 @@ cat ~/.aai/com.yourcompany.yourapp/aai.json | python -m json.tool
 
 ---
 
-[Back to Protocol](/protocol/) | [Web Platform](/protocol/platforms/web)
+[Back to Protocol](/) | [Web Platform](/protocol/platforms/web)

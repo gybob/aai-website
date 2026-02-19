@@ -271,6 +271,6 @@ aai-protocol/
 
 ## Resources
 
-- [Protocol Specification](/protocol/)
+- [Protocol Specification](/)
 - [MCP Documentation](https://modelcontextprotocol.io/)
 - [GitHub Issues](https://github.com/gybob/aai-protocol/issues)

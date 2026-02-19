@@ -14,8 +14,8 @@ Before implementing, understand the AAI protocol:
 
 | Resource | Description |
 |----------|-------------|
-| [Protocol Overview](/protocol/) | What is AAI and why it matters |
-| [Protocol Overview](/protocol/) | Full spec index |
+| [Protocol Overview](/) | What is AAI and why it matters |
+| [Protocol Overview](/) | Full spec index |
 | [aai.json Descriptor](../aai-json) | Descriptor format |
 | [Security Model](../security) | OAuth 2.1 flow details |
 
@@ -277,4 +277,4 @@ curl -X POST https://api.yourcompany.com/v1/search \
 
 ---
 
-[Back to Protocol](/protocol/) | [macOS Platform](/protocol/platforms/macos)
+[Back to Protocol](/) | [macOS Platform](/protocol/platforms/macos)

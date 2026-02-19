@@ -168,4 +168,4 @@ Web Apps are discovered through the AAI Registry—no manual installation needed
 ## Getting Help
 
 - **GitHub Issues**: [github.com/gybob/aai-protocol/issues](https://github.com/gybob/aai-protocol/issues)
-- **Documentation**: Browse the [Protocol](/protocol/) section for technical details
+- **Documentation**: Browse the [Protocol](/) section for technical details

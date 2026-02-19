@@ -16,8 +16,7 @@ export default defineConfig({
     siteTitle: 'AAI Protocol',
 
     nav: [
-      { text: 'Home', link: '/' },
-      { text: 'Protocol', link: '/protocol/' },
+      { text: 'Protocol', link: '/' },
       { text: 'Guide', link: '/guide/users' },
       { text: 'GitHub', link: 'https://github.com/gybob/aai-protocol' },
     ],
@@ -27,7 +26,7 @@ export default defineConfig({
         {
           text: 'Protocol',
           items: [
-            { text: 'Overview', link: '/protocol/' },
+            { text: 'Overview', link: '/' },
             { text: 'Architecture', link: '/protocol/architecture' },
             { text: 'aai.json Descriptor', link: '/protocol/aai-json' },
             { text: 'Security Model', link: '/protocol/security' },
@@ -78,6 +77,7 @@ export default defineConfig({
       light: 'github-light',
       dark: 'github-dark',
     },
+    mermaid: {},
   },
 })
 

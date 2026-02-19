@@ -190,4 +190,4 @@ See [Security Model](/protocol/security) for OAuth 2.1 configuration.
 
 ---
 
-[Back to Protocol](/protocol/)
+[Back to Protocol](/)

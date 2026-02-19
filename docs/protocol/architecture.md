@@ -100,4 +100,4 @@ Agents load tool definitions on-demand via MCP resources, avoiding context explo
 
 ---
 
-[Back to Protocol](/protocol/)
+[Back to Protocol](/)

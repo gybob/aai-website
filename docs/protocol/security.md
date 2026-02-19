@@ -441,4 +441,4 @@ Tokens MUST be stored securely using OS keystore:
 
 ---
 
-[Back to Protocol](/protocol/)
+[Back to Protocol](/)
