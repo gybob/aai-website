@@ -53,7 +53,7 @@ flowchart TB
 
 ### 1. Abstract Descriptor
 
-`aai.json` is a **platform-agnostic descriptor** that defines capabilities using JSON Schema. See [aai.json Descriptor](./aai-json.md).
+`aai.json` is a **platform-agnostic descriptor** that defines capabilities using JSON Schema. See [aai.json Descriptor](/protocol/aai-json).
 
 ### 2. Two-Layer Authorization
 
@@ -64,7 +64,7 @@ Both layers authorize agent to access app, but protect different parties:
 | **Gateway Consent** | Gateway | User from malicious apps |
 | **App Authorization** | App or OS | App data from unauthorized agents |
 
-See [Security Model](./security.md) for details.
+See [Security Model](/protocol/security) for details.
 
 ### 3. Pluggable Executors
 
@@ -100,4 +100,4 @@ Agents load tool definitions on-demand via MCP resources, avoiding context explo
 
 ---
 
-[Back to Spec Index](./README.md)
+[Back to Protocol](/protocol/)

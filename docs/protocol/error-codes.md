@@ -71,4 +71,4 @@ For HTTP execution, standard HTTP status codes apply:
 
 ---
 
-[Back to Spec Index](./README.md)
+[Back to Protocol](/protocol/)

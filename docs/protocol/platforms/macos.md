@@ -14,10 +14,10 @@ Before implementing, understand the AAI protocol:
 
 | Resource | Description |
 |----------|-------------|
-| [AAI Protocol Overview](../../) | What is AAI and why it matters |
-| [Protocol Specification](../README.md) | Full spec index |
-| [aai.json Descriptor](../aai-json.md) | Descriptor format |
-| [Security Model](../security.md) | Authorization details |
+| [Protocol Overview](/protocol/) | What is AAI and why it matters |
+| [Protocol Overview](/protocol/) | Full spec index |
+| [aai.json Descriptor](../aai-json) | Descriptor format |
+| [Security Model](../security) | Authorization details |
 
 ## IPC Protocol
 
@@ -151,7 +151,7 @@ struct AAIError: Codable {
 }
 ```
 
-See [Error Codes](../error-codes.md) for standard codes.
+See [Error Codes](../error-codes) for standard codes.
 
 ### 4. Create aai.json
 
@@ -283,4 +283,4 @@ cat ~/.aai/com.yourcompany.yourapp/aai.json | python -m json.tool
 
 ---
 
-[Back to Spec Index](../README.md) | [Web Platform](./web.md)
+[Back to Protocol](/protocol/) | [Web Platform](/protocol/platforms/web)

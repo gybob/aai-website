@@ -1,35 +1,15 @@
 import { defineConfig } from 'vitepress'
 
-const specSidebar = [
-  {
-    text: 'Core Documents',
-    items: [
-      { text: 'Specification Index', link: '/spec/' },
-      { text: 'Architecture', link: '/spec/architecture' },
-      { text: 'aai.json Descriptor', link: '/spec/aai-json' },
-      { text: 'Security Model', link: '/spec/security' },
-      { text: 'Error Codes', link: '/spec/error-codes' },
-      { text: 'Discovery', link: '/spec/discovery' },
-    ],
-  },
-  {
-    text: 'Platform Guides',
-    items: [
-      { text: 'macOS (Apple Events)', link: '/spec/platforms/macos' },
-      { text: 'Web (HTTP + OAuth 2.1)', link: '/spec/platforms/web' },
-    ],
-  },
-]
-
 export default defineConfig({
   title: 'AAI Protocol',
-  description: 'Agent App Interface - Open protocol for AI Agents to directly invoke application capabilities',
+  description: 'An open protocol that makes any application accessible to AI Agents',
 
   head: [
     ['meta', { name: 'theme-color', content: '#3c8cff' }],
     ['meta', { property: 'og:type', content: 'website' }],
     ['meta', { property: 'og:title', content: 'AAI Protocol' }],
-    ['meta', { property: 'og:description', content: 'Open protocol for AI Agents to directly invoke application capabilities' }],
+    ['meta', { property: 'og:description', content: 'An open protocol that makes any application accessible to AI Agents' }],
+    ['meta', { property: 'og:image', content: '/aai-protocol-diagram.png' }],
   ],
 
   themeConfig: {
@@ -37,24 +17,42 @@ export default defineConfig({
 
     nav: [
       { text: 'Home', link: '/' },
-      { text: 'Guide', link: '/guide/getting-started' },
-      { text: 'Specification', link: '/spec/' },
+      { text: 'Protocol', link: '/protocol/' },
+      { text: 'Guide', link: '/guide/users' },
       { text: 'GitHub', link: 'https://github.com/gybob/aai-protocol' },
     ],
 
     sidebar: {
+      '/protocol/': [
+        {
+          text: 'Protocol',
+          items: [
+            { text: 'Overview', link: '/protocol/' },
+            { text: 'Architecture', link: '/protocol/architecture' },
+            { text: 'aai.json Descriptor', link: '/protocol/aai-json' },
+            { text: 'Security Model', link: '/protocol/security' },
+            { text: 'Discovery', link: '/protocol/discovery' },
+            { text: 'Error Codes', link: '/protocol/error-codes' },
+          ],
+        },
+        {
+          text: 'Platform Guides',
+          items: [
+            { text: 'macOS', link: '/protocol/platforms/macos' },
+            { text: 'Web', link: '/protocol/platforms/web' },
+          ],
+        },
+      ],
       '/guide/': [
         {
           text: 'Guide',
           items: [
-            { text: 'Getting Started', link: '/guide/getting-started' },
-            { text: 'For Users', link: '/guide/for-users' },
-            { text: 'For App Developers', link: '/guide/for-app-developers' },
-            { text: 'For Gateway Contributors', link: '/guide/for-gateway-contributors' },
+            { text: 'For Users', link: '/guide/users' },
+            { text: 'For App Developers', link: '/guide/developers' },
+            { text: 'For Gateway Contributors', link: '/guide/contributors' },
           ],
         },
       ],
-      '/spec/': specSidebar,
     },
 
     socialLinks: [
@@ -68,6 +66,17 @@ export default defineConfig({
 
     search: {
       provider: 'local',
+    },
+
+    outline: {
+      level: [2, 3],
+    },
+  },
+
+  markdown: {
+    theme: {
+      light: 'github-light',
+      dark: 'github-dark',
     },
   },
 })

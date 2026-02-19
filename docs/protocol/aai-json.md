@@ -186,8 +186,8 @@ The `version` field follows [Semantic Versioning](https://semver.org/): `MAJOR.M
 
 ## Authentication (web only)
 
-See [Security Model](./security.md) for OAuth 2.1 configuration.
+See [Security Model](/protocol/security) for OAuth 2.1 configuration.
 
 ---
 
-[Back to Spec Index](./README.md)
+[Back to Protocol](/protocol/)

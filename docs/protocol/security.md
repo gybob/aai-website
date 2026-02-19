@@ -206,6 +206,47 @@ Data stored in keystore should be JSON-encoded then encrypted:
 | `tools.<name>.granted_at` | string | When consent was granted |
 | `tools.<name>.remember` | boolean | Persist decision |
 
+### Implementation Example (macOS)
+
+```swift
+import Security
+
+func storeConsent(_ consent: Data, forAppId appId: String) throws {
+    let query: [String: Any] = [
+        kSecClass as String: kSecClassGenericPassword,
+        kSecAttrService as String: "aai-gateway",
+        kSecAttrAccount as String: "consent-\(appId)",
+        kSecValueData as String: consent
+    ]
+    
+    let status = SecItemAdd(query as CFDictionary, nil)
+    guard status == errSecSuccess else {
+        throw KeychainError.storeFailed
+    }
+}
+
+func loadConsent(forAppId appId: String) throws -> Data? {
+    let query: [String: Any] = [
+        kSecClass as String: kSecClassGenericPassword,
+        kSecAttrService as String: "aai-gateway",
+        kSecAttrAccount as String: "consent-\(appId)",
+        kSecReturnData as String: true
+    ]
+    
+    var result: AnyObject?
+    let status = SecItemCopyMatching(query as CFDictionary, &result)
+    
+    if status == errSecItemNotFound {
+        return nil
+    }
+    guard status == errSecSuccess else {
+        throw KeychainError.loadFailed
+    }
+    
+    return result as? Data
+}
+```
+
 ## App Authorization
 
 After Gateway consent, the app (or OS) requires its own authorization. This protects app data from unauthorized agent access.
@@ -400,4 +441,4 @@ Tokens MUST be stored securely using OS keystore:
 
 ---
 
-[Back to Spec Index](./README.md)
+[Back to Protocol](/protocol/)

@@ -158,4 +158,4 @@ Agent only loads descriptors when the user mentions an app.
 
 ---
 
-[Back to Spec Index](./README.md)
+[Back to Protocol](/protocol/)
