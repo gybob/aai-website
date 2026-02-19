@@ -4,148 +4,379 @@ title: "Security Model"
 
 # Security Model
 
-AAI uses different security mechanisms for desktop apps and Web Apps:
+## Overview
 
-- **Desktop apps**: Operating system's native authorization (TCC, UAC, Polkit)
-- **Web Apps**: OAuth 2.0 / API Key authentication, managed by Gateway
+Both authorization layers are about **user authorizing agent to access an app**, but with different protection goals:
 
-## Desktop App Authorization
+| Layer | Initiated By | Protects Against |
+|-------|--------------|------------------|
+| **Gateway Consent** | Gateway | Malicious apps exposing dangerous tools to user |
+| **App Authorization** | App or OS | Agent accessing app data without user's knowledge |
 
-| Platform    | Authorization Mechanism                                | User Experience                                                                            |
-| ----------- | ------------------------------------------------------ | ------------------------------------------------------------------------------------------ |
-| **macOS**   | System TCC (Transparency, Consent, and Control)        | First-time automation tool use popup: "AAI Gateway wants to control Mail" -> [Allow]/[Deny] |
-| **Windows** | UAC (User Account Control) or application's own prompt | Some apps show security warning when using COM for the first time                          |
-| **Linux**   | Polkit or desktop environment security framework       | System-level security prompt                                                               |
+**Gateway Consent is required for ALL platforms** (macOS, web, linux, windows).
 
-### macOS TCC Authorization Flow
+## Why Two Layers?
 
-```
-1. Agent requests to call Mail application
-   ↓
-2. Gateway executes AppleScript
-   ↓
-3. macOS detects automation call
-   ↓
-4. System popup (first time):
-   ┌─────────────────────────────────────┐
-   │  "AAI Gateway" wants to control "Mail"   │
-   │                                     │
-   │  If you don't trust this application, │
-   │  please deny it.                     │
-   │                                     │
-   │  [Deny]               [OK]          │
-   └─────────────────────────────────────┘
-   ↓
-5. User clicks [OK]
-   ↓
-6. System records authorization
-   ↓
-7. Subsequent calls don't require popup
-```
+### Gateway Consent (Protects User from Malicious Apps)
 
-### Windows COM Security Flow
+Without Gateway consent:
+- Malicious web app could expose `delete_all_files` tool
+- Agent would call it without user awareness
+- User's data destroyed
 
-```
-1. Agent requests to call Outlook
-   ↓
-2. Gateway creates COM object
-   ↓
-3. Windows checks COM security settings
-   ↓
-4. Some apps show popup (first time):
-   ┌─────────────────────────────────────┐
-   │  Allow this website to open Outlook?   │
-   │                                     │
-   │  [Don't Allow]       [Allow]         │
-   └─────────────────────────────────────┘
-   ↓
-5. User clicks [Allow]
-   ↓
-6. Subsequent calls may still require confirmation (depends on app settings)
-```
+With Gateway consent:
+- Gateway shows: "App X wants to expose tool: `delete_all_files`"
+- Description: "Delete all files in user's home directory"
+- User must explicitly authorize before agent can call
 
-## Web App Authorization
+### App Authorization (Protects App Data from Unauthorized Agent Access)
 
-For Web Apps, Gateway handles OAuth 2.0 authentication or API key management.
+Without App authorization:
+- Agent could access user's email without app's knowledge
+- User might not realize agent has full access to their data
 
-### User Confirmation (Domain & Certificate Verification)
+With App authorization:
+- Web app shows: "Agent X requests access to: send_email, read_inbox"
+- User confirms they trust this agent
+- App knows which operations are authorized
 
-Before initiating any authentication flow for a Web App, Gateway **must** display domain and certificate information to the user:
+## Gateway Consent Flow
 
-```
-1. Agent calls a Web App tool for the first time
-   ↓
-2. Gateway shows domain verification prompt:
-   ┌──────────────────────────────────────────────┐
-   │  AAI Gateway - Web App Authorization         │
-   │                                              │
-   │  Domain:       api.notion.com                │
-   │  SSL Cert:     ✅ Valid (issued by DigiCert) │
-   │  App Name:     Notion                        │
-   │  Permissions:  read_content, update_content  │
-   │                                              │
-   │  [Cancel]                    [Authorize]     │
-   └──────────────────────────────────────────────┘
-   ↓
-3a. User clicks [Cancel] → return AUTH_REQUIRED error
-3b. User clicks [Authorize] → proceed to OAuth or API Key flow
+```mermaid
+sequenceDiagram
+    participant A as Agent
+    participant G as Gateway
+    participant U as User (Gateway UI)
+    
+    A->>G: tools/call (tool="send_email")
+    
+    Note over G: Check gateway consent for tool
+    
+    alt tool authorized at gateway
+        Note over G: Proceed to app authorization
+    else tool not authorized
+        G-->>A: error: CONSENT_REQUIRED
+        Note over A: Agent should inform user
+        A->>U: "I need permission to send emails"
+        U->>G: Open consent UI
+        G->>U: Show tool details
+        Note over U: User reviews and authorizes
+        U->>G: Grant consent
+        G->>G: Save consent
+        Note over G: Proceed to app authorization
+    end
+    
+    Note over G: Continue with app authorization...
 ```
 
-This ensures users are aware of which domain they are granting access to and can verify the SSL certificate is valid.
+### Consent Required Error
 
-### OAuth 2.0 Authorization Flow
+When agent calls an unauthorized tool:
 
-```
-1. Agent calls a web tool (e.g., Notion search)
-   ↓
-2. Gateway checks: does ~/.aai/tokens/com.notion.api.json exist?
-   ↓
-3a. Token exists and valid → inject into request, proceed to step 8
-3b. Token exists but expired → auto-refresh via token_url, proceed to step 8
-3c. No token → user confirmation (see above), then start OAuth flow (step 4)
-   ↓
-4. Gateway opens browser for user authorization:
-   ┌──────────────────────────────────────┐
-   │  Notion wants you to grant access    │
-   │                                      │
-   │  AAI Gateway is requesting:          │
-   │  • Read your content                 │
-   │  • Update your content               │
-   │                                      │
-   │  [Cancel]            [Allow Access]  │
-   └──────────────────────────────────────┘
-   ↓
-5. User clicks [Allow Access]
-   ↓
-6. Gateway receives auth code → exchanges for access + refresh tokens
-   → stores in ~/.aai/tokens/<appId>.json
-   ↓
-7. Gateway sends API request with token in Authorization header
-   ↓
-8. Web App returns response → Gateway returns to Agent
+```json
+{
+  "error": {
+    "code": "CONSENT_REQUIRED",
+    "message": "User consent required for tool",
+    "data": {
+      "app_id": "com.example.mail",
+      "app_name": "Example Mail",
+      "tool": "send_email",
+      "tool_description": "Send an email on behalf of the user",
+      "tool_parameters": {
+        "to": { "type": "array", "items": { "type": "string" }, "description": "Recipient email addresses" },
+        "subject": { "type": "string", "description": "Email subject line" },
+        "body": { "type": "string", "description": "Email body content" }
+      },
+      "consent_url": "aai://consent?app=com.example.mail&tool=send_email"
+    }
+  }
+}
 ```
 
-### API Key / Bearer Token Flow
+Agent should present this information to user and guide them to authorize.
+
+## Gateway Consent UI Requirements
+
+Gateway MUST display the following information:
+
+### Required Information
+
+| Field | Source | Description |
+|-------|--------|-------------|
+| App Name | `app.name` | Which app is exposing this tool |
+| App ID | `app.id` | Unique identifier |
+| Tool Name | `tool.name` | Tool identifier |
+| Tool Description | `tool.description` | What the tool does |
+| Parameters | `tool.parameters` | What data agent can pass to tool |
+| Returns | `tool.returns` | What data tool returns (if sensitive) |
+
+### UI Example
 
 ```
-1. Agent calls a web tool
-   ↓
-2. Gateway reads API key from environment variable (defined in aai.json auth.env_var)
-   ↓
-3a. Key found → inject into request header/query
-3b. Key not found → return PERMISSION_DENIED error with instructions
-   ↓
-4. Send API request → return response to Agent
+┌─────────────────────────────────────────────────────────────┐
+│ ⚠️  Tool Authorization Request                              │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│ App: Example Mail (com.example.mail)                        │
+│                                                             │
+│ Agent requests permission to use:                           │
+│                                                             │
+│ ┌─────────────────────────────────────────────────────────┐ │
+│ │ send_email                                              │ │
+│ │                                                         │ │
+│ │ Send an email on behalf of the user                     │ │
+│ │                                                         │ │
+│ │ Parameters:                                             │ │
+│ │ • to: Recipient email addresses                         │ │
+│ │ • subject: Email subject line                           │ │
+│ │ • body: Email body content                              │ │
+│ │                                                         │ │
+│ │ ⚠️ Agent can send emails to anyone with any content     │ │
+│ └─────────────────────────────────────────────────────────┘ │
+│                                                             │
+│ [Authorize Tool]  [Authorize All Tools]  [Deny]             │
+│                                                             │
+│ ☐ Remember this decision                                   │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
 ```
+
+### User Choices
+
+| Option | Behavior |
+|--------|----------|
+| **Authorize Tool** | Grant access to this specific tool only |
+| **Authorize All Tools** | Grant access to all tools from this app |
+| **Deny** | Reject access, agent cannot use this tool |
+| **Remember** | Persist decision, don't ask again for this tool |
+
+## Secure Storage
+
+**CRITICAL**: All sensitive data must be stored securely using OS-provided credential storage. Never store tokens or consent data in plaintext.
+
+### Platform Storage APIs
+
+| Platform | API | Description |
+|----------|-----|-------------|
+| macOS | Keychain Services | `SecItemAdd`, `SecItemCopyMatching` |
+| Windows | Credential Manager | `CredWrite`, `CredRead` |
+| Linux | libsecret / gnome-keyring | `secret_password_store`, `secret_password_lookup` |
+
+### What to Store Securely
+
+| Data Type | Storage Method | Why |
+|-----------|----------------|-----|
+| OAuth tokens | Encrypted in OS keystore | Sensitive credentials |
+| Refresh tokens | Encrypted in OS keystore | Long-lived credential |
+| Consent decisions | Encrypted in OS keystore | User authorization state |
+
+### Data Format
+
+Data stored in keystore should be JSON-encoded then encrypted:
+
+```json
+{
+  "consents": {
+    "com.example.mail": {
+      "all_tools": false,
+      "tools": {
+        "send_email": {
+          "granted": true,
+          "granted_at": "2026-02-19T10:00:00Z",
+          "remember": true
+        },
+        "delete_email": {
+          "granted": false,
+          "granted_at": "2026-02-19T10:00:00Z",
+          "remember": true
+        }
+      }
+    }
+  }
+}
+```
+
+### Storage Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `all_tools` | boolean | User authorized all tools from this app |
+| `tools.<name>.granted` | boolean | Whether this tool is authorized |
+| `tools.<name>.granted_at` | string | When consent was granted |
+| `tools.<name>.remember` | boolean | Persist decision |
+
+## App Authorization
+
+After Gateway consent, the app (or OS) requires its own authorization. This protects app data from unauthorized agent access.
+
+### Desktop (macOS)
+
+| Layer | Protects |
+|-------|----------|
+| Gateway Consent | User from malicious apps |
+| OS Authorization | App data from unauthorized agents |
+
+macOS prompts user when Gateway first calls the app via Apple Events. User approves once, OS remembers.
+
+### Web (OAuth 2.1)
+
+| Layer | Protects |
+|-------|----------|
+| Gateway Consent | User from malicious apps |
+| App Authorization | App data from unauthorized agents |
+
+**Key**: Gateway passes authorized tools to web app via `aai_tools` parameter. Web app displays this list for user confirmation—no need to implement its own tool-level consent.
+
+#### Authorization Flow
+
+```mermaid
+sequenceDiagram
+    participant A as Agent
+    participant G as Gateway
+    participant B as Browser
+    participant W as Web App
+    
+    A->>G: tools/call
+    
+    Note over G: 1. Check gateway consent (passed)
+    Note over G: 2. Check token validity
+    
+    alt access token valid
+        G->>W: API request with token
+        W-->>G: API response
+    else token expired, refresh exists
+        G->>W: POST /token (refresh)
+        W-->>G: new tokens
+        G->>W: API request with token
+        W-->>G: API response
+    else no token
+        G->>B: open browser with aai_tools
+        Note over G: aai_tools = ["send_email", "read_inbox"]
+        B->>W: GET /authorize?aai_tools=...
+        W->>B: show authorized tools for confirmation
+        Note over W: User confirms tool access
+        W-->>B: redirect with auth code
+        B->>G: callback with code
+        G->>W: POST /token (auth code)
+        W-->>G: access + refresh tokens
+        G->>W: API request with token
+        W-->>G: API response
+    end
+    
+    G-->>A: tool result
+```
+
+#### Authorization Endpoint
+
+**Request** (browser redirect):
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `response_type` | string | `code` |
+| `client_id` | string | Client identifier |
+| `redirect_uri` | string | Callback URL |
+| `scope` | string | Space-separated scopes |
+| `state` | string | CSRF token |
+| `code_challenge` | string | PKCE challenge |
+| `code_challenge_method` | string | `S256` |
+| `aai_tools` | string | Comma-separated list of tools user authorized at Gateway |
+
+Example:
+```
+GET /authorize?
+  response_type=code&
+  client_id=aai-gateway&
+  redirect_uri=http://localhost:3000/callback&
+  scope=read%20write&
+  state=xyz&
+  code_challenge=...&
+  code_challenge_method=S256&
+  aai_tools=send_email,read_inbox,list_contacts
+```
+
+**Web App UI**: Display `aai_tools` as a list for user confirmation:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Authorize AAI Gateway                                       │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│ This agent has been authorized to use:                      │
+│                                                             │
+│ ✓ send_email - Send emails on your behalf                   │
+│ ✓ read_inbox - Read your inbox                              │
+│ ✓ list_contacts - Access your contact list                  │
+│                                                             │
+│ Do you want to allow this agent to access your account?     │
+│                                                             │
+│ [Allow]  [Deny]                                             │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Response** (redirect):
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `code` | string | Authorization code |
+| `state` | string | Must match request |
+
+#### Token Endpoint
+
+**Request (authorization code)**:
+
+```http
+POST /oauth/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=authorization_code&
+code=<code>&
+redirect_uri=<uri>&
+code_verifier=<verifier>
+```
+
+**Request (refresh token)**:
+
+```http
+POST /oauth/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=refresh_token&
+refresh_token=<refresh_token>
+```
+
+**Response**:
+
+```json
+{
+  "access_token": "eyJhbG...",
+  "token_type": "Bearer",
+  "expires_in": 3600,
+  "refresh_token": "dGhpcyBpcy...",
+  "scope": "read write"
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `access_token` | string | Token for API calls |
+| `token_type` | string | `Bearer` |
+| `expires_in` | number | Token lifetime in seconds |
+| `refresh_token` | string | Token for refresh |
 
 ### Token Storage
 
-| Platform | Path |
-|----------|------|
-| macOS / Linux | `~/.aai/tokens/<appId>.json` |
-| Windows | `%USERPROFILE%\.aai\tokens\<appId>.json` |
+Tokens MUST be stored securely using OS keystore:
 
-Token files contain:
+| Platform | Storage Location |
+|----------|------------------|
+| macOS | Keychain (Service: `aai-gateway`, Account: `token-<app_id>`) |
+| Windows | Credential Manager (Target: `aai-gateway/token/<app_id>`) |
+| Linux | libsecret (Schema: `aai-gateway`, Attribute: `app_id`) |
+
+**Data Format** (stored encrypted):
+
 ```json
 {
   "access_token": "...",
@@ -155,13 +386,17 @@ Token files contain:
 }
 ```
 
-### Security Principles
+**NEVER**:
+- Store tokens in plaintext files
+- Log tokens to console or files
+- Transmit tokens over unencrypted connections
 
-- **Gateway never stores client secrets in aai.json** -- secrets are stored separately in Gateway config
-- **Tokens are stored locally** in the user's home directory, not transmitted to Agent or LLM
-- **Agent only sees API responses**, never raw tokens
-- **Users can revoke access** at any time via the Web App provider's settings or by deleting token files
-- **Scopes are explicitly declared** in aai.json so users know what access is requested
+### Token Lifetime Recommendations
+
+| Token Type | Recommended |
+|------------|-------------|
+| Access Token | 1 hour |
+| Refresh Token | 7 days |
 
 ---
 

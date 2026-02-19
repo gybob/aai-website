@@ -4,80 +4,99 @@ title: "System Architecture"
 
 # System Architecture
 
-## Architecture Diagram
+## Architecture Overview
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                          LLM Agent                               │
-│                        (Cursor/Continue/etc)                     │
-└────────────────────────┬────────────────────────────────────────┘
-                          │ MCP over Stdio
-                          ↓ JSON-RPC
-┌─────────────────────────────────────────────────────────────────┐
-│                      AAI Gateway                                │
-│                 (Long-running MCP Server)                       │
-│  ┌──────────────────────────────────────────────────────────┐  │
-│  │ 1. MCP Server (stdio)                                    │  │
-│  │    - resources/list                                       │  │
-│  │    - resources/read                                       │  │
-│  │    - tools/call                                           │  │
-│  ├──────────────────────────────────────────────────────────┤  │
-│  │ 2. Automation Executors                                   │  │
-│  │                                                           │  │
-│  │    Desktop (Platform-native IPC)                          │  │
-│  │    ┌────────────┐ ┌────────────┐ ┌────────────┐        │  │
-│  │    │ macOS      │ │ Windows    │ │ Linux      │        │  │
-│  │    │ AppleScript│ │ COM        │ │ DBus       │        │  │
-│  │    │ / JXA      │ │ Automation │ │            │        │  │
-│  │    └────────────┘ └────────────┘ └────────────┘        │  │
-│  │                                                           │  │
-│  │    Web App (REST API + Auth)                               │  │
-│  │    ┌─────────────────────────────────────────────┐      │  │
-│  │    │ REST API Executor                           │      │  │
-│  │    │ + OAuth 2.0 / API Key / Bearer Token        │      │  │
-│  │    │ + Token Storage & Auto-Refresh              │      │  │
-│  │    └─────────────────────────────────────────────┘      │  │
-│  ├──────────────────────────────────────────────────────────┤  │
-│  │ 3. aai.json Parser                                        │  │
-│  │    - Schema validation                                    │  │
-│  │    - Script / endpoint template parsing                   │  │
-│  ├──────────────────────────────────────────────────────────┤  │
-│  │ 4. Error Handling                                         │  │
-│  │    - Standardized error codes                             │  │
-│  │    - Friendly error messages                               │  │
-│  └──────────────────────────────────────────────────────────┘  │
-└─────────┬──────────────────┬──────────────────┬────────────────┘
-          │                  │                  │
-          │ Platform IPC     │ Platform IPC     │ HTTPS
-          ↓                  ↓                  ↓
-┌──────────────────┐ ┌──────────────┐ ┌──────────────────────┐
-│   Desktop App     │ │  Desktop App  │ │      Web App         │
-│  (Mail, Calendar) │ │ (Outlook,Word)│ │  (Notion, Slack,     │
-│                   │ │               │ │   GitHub, Jira...)   │
-│  AppleScript/JXA  │ │ COM Automation│ │                      │
-│  (AppleEvents)    │ │ (COM IPC)     │ │  REST API + OAuth    │
-│                   │ │               │ │                      │
-│  + aai.json       │ │ + aai.json    │ │  + aai.json          │
-└──────────────────┘ └──────────────┘ └──────────────────────┘
+```mermaid
+flowchart TB
+    subgraph Agent["LLM Agent"]
+        A1[OpenClaw / Claude / etc]
+    end
+
+    subgraph Gateway["AAI Gateway"]
+        G1["MCP Interface<br/>resources/list, resources/read<br/>tools/call"]
+        G2["Descriptor Parser<br/>JSON Schema validation"]
+        G3["Consent Manager<br/>Per-tool authorization"]
+        G4["Execution Layer"]
+        
+        subgraph G4["Execution Layer"]
+            E1["macOS Executor<br/>JSON over Apple Events"]
+            E2["Web Executor<br/>JSON over HTTP"]
+            E3["..."]
+        end
+        
+        G1 --> G2 --> G3 --> G4
+    end
+
+    subgraph User["User"]
+        U1["Consent UI"]
+    end
+
+    subgraph Apps["Applications"]
+        D1["macOS App<br/>Apple Events + aai.json"]
+        W1["Web App<br/>HTTP API + aai.json"]
+        X1["..."]
+    end
+
+    Agent -->|"MCP over Stdio (JSON-RPC)"| G1
+    G3 -->|"Request consent"| U1
+    U1 -->|"Grant/Deny"| G3
+    E1 -->|"Apple Events"| D1
+    E2 -->|"HTTP"| W1
+
+    style Agent fill:#e1f5fe
+    style Gateway fill:#fff3e0
+    style Apps fill:#e8f5e9
+    style User fill:#fce4ec
 ```
 
-## Component Responsibilities
+## Core Design Principles
 
-| Component | Responsibilities | Implementation Requirements |
-|-----------|------------------|-----------------------------|
-| **Agent** (Cursor, Continue, LM Studio) | Initiates operation requests | Supports MCP over stdio |
-| **AAI Gateway** | Translates MCP requests -> calls target App | Long-running service process, supports `--mcp` mode |
-| **Desktop App** (Mail, Outlook, Calendar) | Executes specific operations | Supports platform-native automation + provides `aai.json` |
-| **Web App** (Notion, Slack, GitHub) | Executes operations via API | Has REST API + provides `aai.json` |
+### 1. Abstract Descriptor
 
-## Key Principles
+`aai.json` is a **platform-agnostic descriptor** that defines capabilities using JSON Schema. See [aai.json Descriptor](./aai-json.md).
 
-- **Gateway is a long-running service process** that maintains a persistent connection with the Agent
-- **Desktop apps can be in any state** (running, stopped), Gateway handles automatically
-- **Desktop communication uses platform-native IPC** (AppleScript, COM, DBus)
-- **Web App communication uses HTTPS** with OAuth 2.0 / API Key authentication
-- **Gateway manages all authentication state** (token storage, refresh, injection)
-- **Leverages existing interfaces** -- both desktop automation and REST APIs require no additional development
+### 2. Two-Layer Authorization
+
+Both layers authorize agent to access app, but protect different parties:
+
+| Layer | Initiated By | Protects |
+|-------|--------------|----------|
+| **Gateway Consent** | Gateway | User from malicious apps |
+| **App Authorization** | App or OS | App data from unauthorized agents |
+
+See [Security Model](./security.md) for details.
+
+### 3. Pluggable Executors
+
+Gateway uses platform-specific executors:
+
+| Platform | Transport | App Authorization |
+|----------|-----------|-------------------|
+| macOS | JSON over Apple Events | Operating System |
+| web | JSON over HTTP | OAuth 2.1 |
+| linux | JSON over IPC (TBD) | Operating System |
+| windows | JSON over IPC (TBD) | Operating System |
+| ... | ... | ... |
+
+### 4. Progressive Discovery
+
+Agents load tool definitions on-demand via MCP resources, avoiding context explosion.
+
+## Data Flow
+
+```
+1. Agent → resources/list    → Gateway returns available apps
+2. Agent → resources/read    → Gateway returns app descriptor
+3. Agent → tools/call        → Gateway checks consent → executes → returns result
+```
+
+## Separation of Concerns
+
+| Layer | Concern |
+|-------|---------|
+| **aai.json** | What the app can do (abstract) |
+| **Gateway** | User consent + How to call it (platform-specific) |
+| **App** | Execute the operation |
 
 ---
 

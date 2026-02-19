@@ -1,316 +1,192 @@
 ---
-title: "App Description File: aai.json"
+title: "aai.json Descriptor"
 ---
 
-# App Description File: aai.json
+# aai.json Descriptor
 
-Each application supporting AAI provides `aai.json` in a unified AAI configuration directory.
+## Overview
 
-## File Location
+`aai.json` defines application capabilities using [JSON Schema](https://json-schema.org/). Each file describes a single platform deployment.
 
-| Platform      | Path                                  |
-| ------------- | ------------------------------------- |
-| macOS / Linux | `~/.aai/<appId>/aai.json`             |
-| Windows       | `%USERPROFILE%\.aai\<appId>\aai.json` |
-
-**Examples:**
-
-- macOS: `~/.aai/com.apple.mail/aai.json`
-- Windows: `C:\Users\Alice\.aai\com.microsoft.outlook\aai.json`
-
-**Advantages:**
-
-- No need to modify signed application packages
-- No administrator permissions required
-- Users or the community can freely add, modify, and delete configurations
-- Gateway only needs to scan a single directory to discover all applications
-
-## Structure Example
+## Structure
 
 ```json
 {
   "schema_version": "1.0",
-  "appId": "com.apple.mail",
-  "name": "Mail",
-  "description": "Apple's native email client",
-  "version": "1.0",
-  "platforms": {
-    "macos": {
-      "automation": "applescript",
-      "tools": [
-        {
-          "name": "send_email",
-          "description": "Send a new email via Apple Mail",
-          "parameters": {
-            "type": "object",
-            "properties": {
-              "to": { "type": "string", "description": "Recipient email address" },
-              "subject": { "type": "string", "description": "Email subject" },
-              "body": { "type": "string", "description": "Email body content" }
-            },
-            "required": ["to", "subject", "body"]
-          },
-          "script": "tell application \"Mail\"\n  set newMessage to make new outgoing message with properties {subject:\"${subject}\", content:\"${body}\", visible:false}\n  tell newMessage\n    make new to recipient at beginning of to recipients with properties {address:\"${to}\"}\n    send\n  end tell\nend tell\nreturn \"{\\\"success\\\":true, \\\"message_id\\\":\\\"generated\\\"}\"",
-          "output_parser": "result as text"
-        },
-        {
-          "name": "search_emails",
-          "description": "Search emails in mailbox",
-          "parameters": {
-            "type": "object",
-            "properties": {
-              "query": { "type": "string", "description": "Search query string" }
-            },
-            "required": ["query"]
-          },
-          "script": "tell application \"Mail\"\n  set results to (messages whose subject contains \"${query}\")\nend tell\nreturn \"{\\\"emails\\\":[\\\"result1\\\", \\\"result2\\\"]}\"",
-          "output_parser": "result as text"
-        }
-      ]
-    },
-    "windows": {
-      "automation": "com",
-      "progid": "Outlook.Application",
-      "tools": [
-        {
-          "name": "send_email",
-          "description": "Send a new email via Microsoft Outlook",
-          "parameters": {
-            "type": "object",
-            "properties": {
-              "to": { "type": "string", "description": "Recipient email address" },
-              "subject": { "type": "string", "description": "Email subject" },
-              "body": { "type": "string", "description": "Email body content" }
-            },
-            "required": ["to", "subject", "body"]
-          },
-          "script": [
-            { "action": "create", "var": "app", "progid": "Outlook.Application" },
-            {
-              "action": "call",
-              "var": "mail",
-              "object": "app",
-              "method": "CreateItem",
-              "args": [0]
-            },
-            { "action": "set", "object": "mail", "property": "To", "value": "${to}" },
-            { "action": "set", "object": "mail", "property": "Subject", "value": "${subject}" },
-            { "action": "set", "object": "mail", "property": "Body", "value": "${body}" },
-            { "action": "call", "object": "mail", "method": "Send" },
-            { "action": "return", "value": "{\"success\":true, \"message_id\":\"generated\"}" }
-          ],
-          "output_parser": "last_result"
-        }
-      ]
-    },
-    "linux": {
-      "automation": "dbus",
-      "service": "org.example.Mail",
-      "object": "/org/example/Mail",
-      "interface": "org.example.Mail",
-      "tools": [
-        {
-          "name": "send_email",
-          "description": "Send a new email",
-          "parameters": {
-            "type": "object",
-            "properties": {
-              "to": { "type": "string", "description": "Recipient email address" },
-              "subject": { "type": "string", "description": "Email subject" },
-              "body": { "type": "string", "description": "Email body content" }
-            },
-            "required": ["to", "subject", "body"]
-          },
-          "method": "SendEmail",
-          "output_parser": "json"
-        }
-      ]
-    },
-    "android": {
-      "automation": "intent",
-      "package": "com.example.mail",
-      "tools": [
-        {
-          "name": "send_email",
-          "description": "Send a new email",
-          "parameters": {
-            "type": "object",
-            "properties": {
-              "to": { "type": "string", "description": "Recipient email address" },
-              "subject": { "type": "string", "description": "Email subject" },
-              "body": { "type": "string", "description": "Email body content" }
-            },
-            "required": ["to", "subject", "body"]
-          },
-          "action": "com.example.MAIL_SEND",
-          "extras": {
-            "to": "${to}",
-            "subject": "${subject}",
-            "body": "${body}"
-          },
-          "result_type": "content_provider",
-          "result_uri": "content://com.example.mail/results"
-        }
-      ]
-    },
-    "ios": {
-      "automation": "url_scheme",
-      "scheme": "mailapp",
-      "tools": [
-        {
-          "name": "send_email",
-          "description": "Send a new email",
-          "parameters": {
-            "type": "object",
-            "properties": {
-              "to": { "type": "string", "description": "Recipient email address" },
-              "subject": { "type": "string", "description": "Email subject" },
-              "body": { "type": "string", "description": "Email body content" }
-            },
-            "required": ["to", "subject", "body"]
-          },
-          "url_template": "mailapp://send?to=${to}&subject=${subject}&body=${body}",
-          "result_type": "app_group",
-          "app_group_id": "group.com.example.mail"
-        }
-      ]
-    },
-    "web": {
-      "automation": "restapi",
-      "base_url": "https://api.notion.com/v1",
-      "auth": {
-        "type": "oauth2",
-        "auth_url": "https://api.notion.com/v1/oauth/authorize",
-        "token_url": "https://api.notion.com/v1/oauth/token",
-        "scopes": ["read_content", "update_content"],
-        "token_placement": "header",
-        "token_prefix": "Bearer"
-      },
-      "default_headers": {
-        "Notion-Version": "2022-06-28",
-        "Content-Type": "application/json"
-      },
-      "tools": [
-        {
-          "name": "search",
-          "description": "Search pages and databases",
-          "parameters": {
-            "type": "object",
-            "properties": {
-              "query": { "type": "string", "description": "Search query text" }
-            },
-            "required": ["query"]
-          },
-          "endpoint": "/search",
-          "method": "POST",
-          "body": { "query": "${query}" },
-          "output_parser": "json"
-        }
-      ]
+  "version": "1.0.0",
+  "platform": "macos",
+  "app": {
+    "id": "com.example.app",
+    "name": "Example App",
+    "description": "Brief description"
+  },
+  "execution": {
+    "type": "ipc"
+  },
+  "tools": [
+    {
+      "name": "search",
+      "description": "Search for items",
+      "parameters": {
+        "type": "object",
+        "properties": { ... },
+        "required": [ ... ]
+      }
     }
+  ]
+}
+```
+
+## Field Reference
+
+### Root Fields
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `schema_version` | string | Yes | AAI spec version (`"1.0"`) |
+| `version` | string | Yes | Descriptor version (semver) |
+| `platform` | string | Yes | Target platform |
+| `app` | object | Yes | Application metadata |
+| `execution` | object | No | Execution configuration |
+| `auth` | object | No | OAuth 2.1 config (web only) |
+| `tools` | array | Yes | Tool definitions |
+
+### Platform Values
+
+| Platform | Execution Type | Authorization |
+|----------|----------------|---------------|
+| `macos` | `ipc` | Operating System |
+| `linux` | `ipc` | Operating System |
+| `windows` | `ipc` | Operating System |
+| `web` | `http` | OAuth 2.1 |
+
+### app Fields
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `id` | string | Yes | Reverse-DNS identifier |
+| `name` | string | Yes | Human-readable name |
+| `description` | string | Yes | Brief description |
+
+### execution Fields
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `type` | string | Yes | `ipc` or `http` |
+| `base_url` | string | web only | Base URL |
+| `default_headers` | object | No | Headers for all requests |
+
+### tools[] Fields
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `name` | string | Yes | Tool identifier (snake_case) |
+| `description` | string | Yes | What the tool does |
+| `parameters` | object | Yes | JSON Schema for parameters |
+| `returns` | object | No | JSON Schema for return value |
+| `execution` | object | web only | Tool-specific HTTP config |
+
+### tools[].execution Fields (web only)
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `path` | string | URL path |
+| `method` | string | HTTP method |
+| `headers` | object | Additional headers |
+
+## Parameter Schema
+
+Tool `parameters` and `returns` follow [JSON Schema Draft-07](https://json-schema.org/draft-07/json-schema-release-notes.html).
+
+```json
+{
+  "name": "search",
+  "description": "Search for items",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "query": { "type": "string", "description": "Search query" },
+      "limit": { "type": "integer", "minimum": 1, "maximum": 100, "default": 10 }
+    },
+    "required": ["query"]
   }
 }
 ```
 
-## Field Descriptions
+## Version Specification
 
-### Common Fields
+The `version` field follows [Semantic Versioning](https://semver.org/): `MAJOR.MINOR.PATCH`
 
-| Field            | Type   | Description                                                 |
-| ---------------- | ------ | ----------------------------------------------------------- |
-| `schema_version` | string | Schema version of aai.json, used for compatibility checking |
-| `appId`          | string | Unique identifier (recommended to use reverse-DNS format)   |
-| `name`           | string | Application name                                            |
-| `description`    | string | Application description                                     |
-| `version`        | string | aai.json version number                                     |
-| `platforms`      | object | Automation configuration for each platform                  |
+| Change Type | Version Bump | Examples |
+|-------------|--------------|----------|
+| Add new tool | MINOR | `1.0.0` → `1.1.0` |
+| Add optional parameter | MINOR | `1.0.0` → `1.1.0` |
+| Add tool description | PATCH | `1.0.0` → `1.0.1` |
+| Remove tool | MAJOR | `1.0.0` → `2.0.0` |
+| Add required parameter | MAJOR | `1.0.0` → `2.0.0` |
+| Rename tool | MAJOR | `1.0.0` → `2.0.0` |
+| Change parameter type | MAJOR | `1.0.0` → `2.0.0` |
 
-### macOS Specific Fields
+**Rule of thumb**: If existing Agents might break, bump MAJOR. Otherwise, MINOR for new features, PATCH for fixes.
 
-| Field                                   | Type    | Description                                                                       |
-| --------------------------------------- | ------- | --------------------------------------------------------------------------------- |
-| `platforms.macos.automation`            | string  | Automation type: `applescript` or `jxa`                                           |
-| `platforms.macos.tools[].script`        | string  | Script template, supports `${param}` placeholders                                 |
-| `platforms.macos.tools[].output_parser` | string  | Output parsing method: `result as text` (string), `result as record` (dictionary) |
-| `platforms.macos.tools[].timeout`       | integer | Timeout in seconds, default 30                                                    |
+## Examples
 
-### Windows Specific Fields
+### Desktop (macOS)
 
-| Field                                         | Type    | Description                                                                                                                          |
-| --------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `platforms.windows.automation`                | string  | Automation type: `com`                                                                                                               |
-| `platforms.windows.progid`                    | string  | COM ProgID (e.g., `Outlook.Application`)                                                                                             |
-| `platforms.windows.tools[].script`            | array   | COM operation sequence                                                                                                               |
-| `platforms.windows.tools[].script[].action`   | string  | Operation type: `create` (create object), `call` (call method), `set` (set property), `get` (get property), `return` (return result) |
-| `platforms.windows.tools[].script[].var`      | string  | Variable name (for storing return values)                                                                                            |
-| `platforms.windows.tools[].script[].object`   | string  | Object reference (e.g., `mail`, `app`)                                                                                               |
-| `platforms.windows.tools[].script[].progid`   | string  | ProgID (only used in `create` operations)                                                                                            |
-| `platforms.windows.tools[].script[].method`   | string  | Method name (only used in `call` operations)                                                                                         |
-| `platforms.windows.tools[].script[].property` | string  | Property name (only used in `set`/`get` operations)                                                                                  |
-| `platforms.windows.tools[].script[].value`    | string  | Property value (supports `${param}` placeholders)                                                                                    |
-| `platforms.windows.tools[].script[].args`     | array   | Method arguments (supports `${param}` placeholders)                                                                                  |
-| `platforms.windows.tools[].output_parser`     | string  | Output parsing method: `last_result` (return value of last operation)                                                                |
-| `platforms.windows.tools[].timeout`           | integer | Timeout in seconds, default 30                                                                                                       |
+```json
+{
+  "schema_version": "1.0",
+  "version": "1.0.0",
+  "platform": "macos",
+  "app": {
+    "id": "com.example.mail",
+    "name": "Mail",
+    "description": "Email client"
+  },
+  "execution": { "type": "ipc" },
+  "tools": [ ... ]
+}
+```
 
-### Linux Specific Fields
+### Web
 
-| Field                                   | Type    | Description                                                   |
-| --------------------------------------- | ------- | ------------------------------------------------------------- |
-| `platforms.linux.automation`            | string  | Automation type: `dbus`                                       |
-| `platforms.linux.service`               | string  | DBus service name (e.g., `org.example.Mail`)                  |
-| `platforms.linux.object`                | string  | DBus object path (e.g., `/org/example/Mail`)                  |
-| `platforms.linux.interface`             | string  | DBus interface name (e.g., `org.example.Mail`)                |
-| `platforms.linux.tools[].method`        | string  | DBus method name (e.g., `SendEmail`)                          |
-| `platforms.linux.tools[].output_parser` | string  | Output parsing method: `json` (assumes JSON return), `string` |
-| `platforms.linux.tools[].timeout`       | integer | Timeout in seconds, default 30                                |
+```json
+{
+  "schema_version": "1.0",
+  "version": "1.0.0",
+  "platform": "web",
+  "app": {
+    "id": "com.example.api",
+    "name": "Example API",
+    "description": "REST API service"
+  },
+  "execution": {
+    "type": "http",
+    "base_url": "https://api.example.com/v1",
+    "default_headers": { "Content-Type": "application/json" }
+  },
+  "auth": {
+    "type": "oauth2",
+    "oauth2": {
+      "authorization_endpoint": "https://example.com/oauth/authorize",
+      "token_endpoint": "https://example.com/oauth/token",
+      "scopes": ["read", "write"],
+      "pkce": { "method": "S256" }
+    }
+  },
+  "tools": [
+    {
+      "name": "search",
+      "execution": { "path": "/search", "method": "POST" },
+      "parameters": { ... }
+    }
+  ]
+}
+```
 
-### Android Specific Fields
+## Authentication (web only)
 
-| Field                                   | Type    | Description                                                                             |
-| --------------------------------------- | ------- | --------------------------------------------------------------------------------------- |
-| `platforms.android.automation`          | string  | Automation type: `intent`                                                               |
-| `platforms.android.package`             | string  | Android package name (e.g., `com.example.mail`)                                         |
-| `platforms.android.tools[].action`      | string  | Intent Action (e.g., `com.example.MAIL_SEND`)                                           |
-| `platforms.android.tools[].extras`      | object  | Intent Extra parameters (supports `${param}` placeholders)                              |
-| `platforms.android.tools[].result_type` | string  | Result retrieval method: `content_provider` (Content Provider), `broadcast` (broadcast) |
-| `platforms.android.tools[].result_uri`  | string  | Content Provider URI (only used when `result_type=content_provider`)                    |
-| `platforms.android.tools[].timeout`     | integer | Timeout in milliseconds, default 5000                                                   |
-
-### iOS Specific Fields
-
-| Field                                | Type    | Description                                                                |
-| ------------------------------------ | ------- | -------------------------------------------------------------------------- |
-| `platforms.ios.automation`           | string  | Automation type: `url_scheme`                                              |
-| `platforms.ios.scheme`               | string  | URL Scheme (e.g., `mailapp`)                                               |
-| `platforms.ios.tools[].url_template` | string  | URL template (supports `${param}` placeholders)                            |
-| `platforms.ios.tools[].result_type`  | string  | Result retrieval method: `app_group` (App Groups), `clipboard` (clipboard) |
-| `platforms.ios.tools[].app_group_id` | string  | App Group ID (only used when `result_type=app_group`)                      |
-| `platforms.ios.tools[].timeout`      | integer | Timeout in seconds, default 10                                             |
-
-### Web App Specific Fields
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `platforms.web.automation` | string | Automation type: `restapi` |
-| `platforms.web.base_url` | string | Base URL for all API calls (e.g., `https://api.notion.com/v1`) |
-| `platforms.web.auth` | object | Authentication configuration |
-| `platforms.web.auth.type` | string | Auth type: `oauth2`, `api_key`, or `bearer` |
-| `platforms.web.auth.auth_url` | string | OAuth authorization endpoint (only for `oauth2`) |
-| `platforms.web.auth.token_url` | string | OAuth token endpoint (only for `oauth2`) |
-| `platforms.web.auth.scopes` | array | Required OAuth scopes (only for `oauth2`) |
-| `platforms.web.auth.token_placement` | string | Where to place token: `header` or `query` |
-| `platforms.web.auth.token_prefix` | string | Token prefix in header (e.g., `Bearer`) |
-| `platforms.web.auth.env_var` | string | Environment variable for API key / bearer token |
-| `platforms.web.auth.key_name` | string | Header or query param name (only for `api_key`) |
-| `platforms.web.auth.key_placement` | string | `header` or `query` (only for `api_key`) |
-| `platforms.web.default_headers` | object | Headers sent with every request |
-| `platforms.web.tools[].endpoint` | string | API endpoint path (appended to `base_url`) |
-| `platforms.web.tools[].method` | string | HTTP method: `GET`, `POST`, `PUT`, `PATCH`, `DELETE` |
-| `platforms.web.tools[].body` | object | Request body template (supports `${param}` placeholders) |
-| `platforms.web.tools[].query_params` | object | URL query parameters (supports `${param}` placeholders) |
-| `platforms.web.tools[].headers` | object | Additional headers for this specific tool |
-| `platforms.web.tools[].output_parser` | string | `json` (default) or `text` |
-| `platforms.web.tools[].timeout` | integer | Timeout in seconds, default 30 |
+See [Security Model](./security.md) for OAuth 2.1 configuration.
 
 ---
 

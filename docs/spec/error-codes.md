@@ -1,46 +1,73 @@
 ---
-title: "Error Handling"
+title: "Error Codes"
 ---
 
-# Error Handling
+# Error Codes
 
-Gateway should return standardized error responses.
+AAI uses structured error responses following JSON-RPC 2.0 conventions.
 
 ## Error Response Format
 
 ```json
 {
-  "jsonrpc": "2.0",
-  "id": 3,
+  "status": "error",
   "error": {
-    "code": -32001,
-    "message": "Automation failed",
-    "data": {
-      "type": "EXECUTION_FAILED",
-      "detail": "Script execution timed out after 30 seconds"
-    }
+    "code": "CODE_NAME",
+    "message": "Human-readable description"
   }
 }
 ```
 
-## Error Code Definitions
+## Standard Codes
 
-| Error Code | Type                     | Description                                           |
-| ---------- | ------------------------ | ----------------------------------------------------- |
-| -32001     | AUTOMATION_FAILED        | Automation script execution failed                    |
-| -32002     | APP_NOT_FOUND            | Target application not installed or cannot be found   |
-| -32003     | TOOL_NOT_FOUND           | Requested tool does not exist in aai.json             |
-| -32004     | PERMISSION_DENIED        | Insufficient permissions, requires user authorization |
-| -32005     | INVALID_PARAMS           | Parameter validation failed                           |
-| -32006     | AUTOMATION_NOT_SUPPORTED | Platform does not support specified automation type   |
-| -32007     | AAI_JSON_INVALID         | aai.json format error or does not match schema        |
-| -32008     | TIMEOUT                  | Operation timed out                                   |
-| -32009     | APP_NOT_RUNNING          | Application not running and cannot be started         |
-| -32010     | SCRIPT_PARSE_ERROR       | Script parsing error                                  |
-| -32011     | AUTH_REQUIRED            | OAuth authorization required, user must authorize via browser |
-| -32012     | AUTH_EXPIRED             | OAuth token expired and refresh failed                |
-| -32013     | API_REQUEST_FAILED       | REST API request failed (HTTP 4xx/5xx)                |
-| -32014     | AUTH_CONFIG_INVALID      | Auth configuration invalid (missing env_var, bad OAuth config) |
+### Protocol Errors (1xx)
+
+| Code | Description |
+|------|-------------|
+| `INVALID_REQUEST` | Malformed JSON or invalid structure |
+| `UNKNOWN_APP` | App not found |
+| `UNKNOWN_TOOL` | Tool not found in descriptor |
+| `INVALID_PARAMS` | Parameters don't match schema |
+
+### Authorization Errors (2xx)
+
+| Code | Description |
+|------|-------------|
+| `AUTH_REQUIRED` | Authentication required |
+| `AUTH_DENIED` | User denied authorization |
+| `AUTH_EXPIRED` | Token expired, refresh failed |
+| `AUTH_INVALID` | Invalid credentials or token |
+
+### Execution Errors (3xx)
+
+| Code | Description |
+|------|-------------|
+| `TIMEOUT` | Operation timed out |
+| `NOT_FOUND` | Resource not found |
+| `RATE_LIMITED` | Too many requests |
+| `SERVICE_UNAVAILABLE` | Service temporarily unavailable |
+
+### Internal Errors (5xx)
+
+| Code | Description |
+|------|-------------|
+| `INTERNAL_ERROR` | Unexpected server error |
+| `NOT_IMPLEMENTED` | Feature not implemented |
+
+## HTTP Status Mapping
+
+For HTTP execution, standard HTTP status codes apply:
+
+| HTTP | AAI Code |
+|------|----------|
+| 400 | `INVALID_REQUEST` |
+| 401 | `AUTH_REQUIRED` / `AUTH_EXPIRED` |
+| 403 | `AUTH_DENIED` |
+| 404 | `UNKNOWN_APP` / `UNKNOWN_TOOL` / `NOT_FOUND` |
+| 429 | `RATE_LIMITED` |
+| 500 | `INTERNAL_ERROR` |
+| 501 | `NOT_IMPLEMENTED` |
+| 503 | `SERVICE_UNAVAILABLE` |
 
 ---
 
