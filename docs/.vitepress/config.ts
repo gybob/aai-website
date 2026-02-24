@@ -23,7 +23,7 @@ export default withMermaid(defineConfig({
     ],
 
     sidebar: {
-      '/protocol/': [
+      '/': [
         {
           text: 'Protocol',
           items: [
