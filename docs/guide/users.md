@@ -1,5 +1,17 @@
 ---
-title: For Users
+title: "AAI Protocol User Guide - Using AI Agents to Control Apps"
+description: "Learn how to use AAI Protocol with Claude, GPT, OpenClaw, CoWork and and AI agents to control your desktop and web applications. Step-by-step installation, consent management, and security guide."
+keywords:
+  - AAI user guide
+  - AI agent setup
+  - Claude desktop automation
+  - GPT app control
+  - OpenClaw tutorial
+  - CoWork integration
+  - MCP server setup
+  - Agent app control
+  - Desktop automation
+  - Web app automation
 ---
 
 # For Users

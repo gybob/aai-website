@@ -1,5 +1,19 @@
 ---
-title: For App Developers
+title: "AAI Developer Guide - Make Your App Agent-Accessible"
+description: "Make your desktop or web application accessible to AI agents like Claude, GPT, OpenClaw, and CoWork with AAI Protocol. Learn to create aai.json descriptors, implement handlers, and register with AAI Registry."
+keywords:
+  - AAI developer guide
+  - aai.json tutorial
+  - Agent accessible apps
+  - Claude app integration
+  - GPT app integration
+  - OpenClaw development
+  - CoWork integration
+  - MCP tool development
+  - Desktop app automation
+  - Web API for agents
+  - AppleScript integration
+  - OAuth for AI agents
 ---
 
 # For App Developers

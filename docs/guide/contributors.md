@@ -1,5 +1,17 @@
 ---
-title: For Gateway Contributors
+title: "AAI Gateway Contributor Guide - Build MCP Servers"
+description: "Contribute to AAI Gateway reference implementation or build your own MCP server. Learn about gateway architecture, executors, consent management, and platform-specific implementations."
+keywords:
+  - AAI gateway development
+  - MCP server implementation
+  - Model Context Protocol
+  - Agent gateway architecture
+  - Consent manager
+  - Apple Events executor
+  - OAuth executor
+  - TypeScript MCP server
+  - AI agent infrastructure
+  - Open source contribution
 ---
 
 # For Gateway Contributors
