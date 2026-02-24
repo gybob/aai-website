@@ -43,6 +43,26 @@ export default withMermaid(defineConfig({
           ],
         },
       ],
+      '/protocol/': [
+        {
+          text: 'Protocol',
+          items: [
+            { text: 'Overview', link: '/' },
+            { text: 'Architecture', link: '/protocol/architecture' },
+            { text: 'aai.json Descriptor', link: '/protocol/aai-json' },
+            { text: 'Security Model', link: '/protocol/security' },
+            { text: 'Discovery', link: '/protocol/discovery' },
+            { text: 'Error Codes', link: '/protocol/error-codes' },
+          ],
+        },
+        {
+          text: 'Platform Guides',
+          items: [
+            { text: 'macOS', link: '/protocol/platforms/macos' },
+            { text: 'Web', link: '/protocol/platforms/web' },
+          ],
+        },
+      ],
       '/guide/': [
         {
           text: 'Guide',

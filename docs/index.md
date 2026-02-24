@@ -1,8 +1,8 @@
 ---
-title: AAI Protocol
+title: "AAI (Agent App Interface)"
 ---
 
-# AAI Protocol
+# AAI (Agent App Interface)
 
 <p align="center">
   <img src="/aai-protocol-diagram.png" alt="AAI Protocol" width="600" />
@@ -11,6 +11,8 @@ title: AAI Protocol
 <p align="center">
   <strong>An open protocol that makes any application accessible to AI Agents.</strong>
 </p>
+
+---
 
 ## Background: The Agent-Software Paradox
 
@@ -28,6 +30,10 @@ Tomorrow's applications will serve two audiences:
 | **AAI** | Agents | Programmatic access, automation, orchestration |
 
 Both interfaces access the same core logic. The GUI remains for humans who prefer visual interaction or need to explore. AAI enables Agents to operate apps on behalf of users—reliably, quickly, and at scale.
+
+This is not about replacing apps. It's about making every app accessible to the AI assistants that users increasingly rely on.
+
+---
 
 ## The Problem
 
@@ -95,3 +101,15 @@ With AAI, users delegate daily work to AI Agents instead of operating applicatio
    - **Web Apps** → JSON over HTTP, Gateway-managed OAuth 2.1 authorization
 
 Both humans (via GUI) and Agents (via AAI) access the same core application logic. Neither interferes with the other.
+
+## Quick Links
+
+| Resource | Description |
+|----------|-------------|
+| [Protocol Overview](/) | Full technical specification |
+| [aai-protocol.org](https://aai-protocol.org) | Official website |
+| [AAI Gateway](https://github.com/gybob/aai-protocol) | Reference implementation |
+
+## License
+
+Apache 2.0
