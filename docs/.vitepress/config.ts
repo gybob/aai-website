@@ -62,3 +62,93 @@ export default withMermaid(defineConfig({
   },
 
   themeConfig: {
+    siteTitle: 'AAI Protocol',
+
+    nav: [
+      { text: 'Protocol', link: '/' },
+      { text: 'Guide', link: '/guide/users' },
+      { text: 'GitHub', link: 'https://github.com/gybob/aai-protocol' },
+    ],
+
+    sidebar: {
+      '/': [
+        {
+          text: 'Protocol',
+          items: [
+            { text: 'Overview', link: '/' },
+            { text: 'Architecture', link: '/protocol/architecture' },
+            { text: 'aai.json Descriptor', link: '/protocol/aai-json' },
+            { text: 'Security Model', link: '/protocol/security' },
+            { text: 'Discovery', link: '/protocol/discovery' },
+            { text: 'Error Codes', link: '/protocol/error-codes' },
+          ],
+        },
+        {
+          text: 'Platform Guides',
+          items: [
+            { text: 'macOS', link: '/protocol/platforms/macos' },
+            { text: 'Web', link: '/protocol/platforms/web' },
+          ],
+        },
+      ],
+      '/protocol/': [
+        {
+          text: 'Protocol',
+          items: [
+            { text: 'Overview', link: '/' },
+            { text: 'Architecture', link: '/protocol/architecture' },
+            { text: 'aai.json Descriptor', link: '/protocol/aai-json' },
+            { text: 'Security Model', link: '/protocol/security' },
+            { text: 'Discovery', link: '/protocol/discovery' },
+            { text: 'Error Codes', link: '/protocol/error-codes' },
+          ],
+        },
+        {
+          text: 'Platform Guides',
+          items: [
+            { text: 'macOS', link: '/protocol/platforms/macos' },
+            { text: 'Web', link: '/protocol/platforms/web' },
+          ],
+        },
+      ],
+      '/guide/': [
+        {
+          text: 'Guide',
+          items: [
+            { text: 'For Users', link: '/guide/users' },
+            { text: 'For App Developers', link: '/guide/developers' },
+            { text: 'For Gateway Contributors', link: '/guide/contributors' },
+          ],
+        },
+      ],
+    },
+
+    socialLinks: [
+      { icon: 'github', link: 'https://github.com/gybob/aai-protocol' },
+    ],
+
+    footer: {
+      message: 'Released under the Apache 2.0 License.',
+      copyright: 'Copyright 2025-present AAI Protocol Contributors',
+    },
+
+    search: {
+      provider: 'local',
+    },
+
+    outline: {
+      level: [2, 3],
+    },
+  },
+
+  markdown: {
+    theme: {
+      light: 'github-light',
+      dark: 'github-dark',
+    },
+  },
+
+  mermaid: {
+    theme: 'default',
+  },
+}))
