@@ -7,7 +7,6 @@ title: "System Architecture"
 ## Architecture Overview
 
 ```mermaid
-%%{init: {'flowchart': {'padding': 20, 'nodeSpacing': 50, 'rankSpacing': 80}}}%%
 flowchart TB
     subgraph Agent["LLM Agent"]
         A1[Claude / OpenClaw / etc]

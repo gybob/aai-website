@@ -102,14 +102,6 @@ With AAI, users delegate daily work to AI Agents instead of operating applicatio
 
 Both humans (via GUI) and Agents (via AAI) access the same core application logic. Neither interferes with the other.
 
-## Quick Links
-
-| Resource | Description |
-|----------|-------------|
-| [Protocol Overview](/) | Full technical specification |
-| [aai-protocol.org](https://aai-protocol.org) | Official website |
-| [AAI Gateway](https://github.com/gybob/aai-protocol) | Reference implementation |
-
 ## License
 
 Apache 2.0
