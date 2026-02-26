@@ -39,7 +39,7 @@ export default withMermaid(defineConfig({
     ['meta', { name: 'keywords', content: 'AAI, Agent App Interface, AI Agent, MCP, Model Context Protocol, OpenClaw, CoWork, Claude, GPT, Agent Protocol, App Automation, Desktop Automation, Web API, OAuth, AppleScript, AI Tools, LLM Integration' }],
     ['meta', { name: 'author', content: 'AAI Protocol Contributors' }],
     ['meta', { name: 'robots', content: 'index, follow' }],
-    ['link', { rel: 'canonical', href: SITE_URL }],
+    ['script', { type: 'application/ld+json' }, JSON.stringify(jsonLd)],
     ['meta', { property: 'og:type', content: 'website' }],
     ['meta', { property: 'og:url', content: SITE_URL }],
     ['meta', { property: 'og:title', content: SITE_TITLE }],
@@ -55,6 +55,14 @@ export default withMermaid(defineConfig({
     ['link', { rel: 'icon', type: 'image/png', href: '/aai-protocol-diagram.png' }],
     ['link', { rel: 'apple-touch-icon', href: '/aai-protocol-diagram.png' }],
   ],
+
+  transformHead({ pageData }) {
+    const path = pageData.relativePath
+      .replace(/index\.md$/, '')
+      .replace(/\.md$/, '')
+    const canonicalUrl = path ? `${SITE_URL}/${path}` : SITE_URL
+    return [['link', { rel: 'canonical', href: canonicalUrl }]]
+  },
 
   sitemap: {
     hostname: SITE_URL,
