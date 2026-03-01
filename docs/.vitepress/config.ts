@@ -74,7 +74,6 @@ export default withMermaid(defineConfig({
 
     nav: [
       { text: 'Protocol', link: '/' },
-      { text: 'Guide', link: '/guide/users' },
       { text: 'GitHub', link: 'https://github.com/gybob/aai-protocol' },
     ],
 
