@@ -36,8 +36,8 @@ All with your explicit consent for each action.
 
 ```bash
 # Clone the repository
-git clone https://github.com/gybob/aai-protocol.git
-cd aai-protocol
+git clone https://github.com/gybob/aai-gateway.git
+cd aai-gateway
 
 # Install dependencies
 npm install
@@ -56,8 +56,7 @@ Add AAI Gateway as an MCP server in your Agent's configuration.
 {
   "mcpServers": {
     "aai-gateway": {
-      "command": "node",
-      "args": ["/path/to/aai-protocol/dist/index.js", "--mcp"]
+      "command": "aai-gateway"
     }
   }
 }
@@ -79,7 +78,7 @@ Ask your Agent what applications are available:
 What apps can you access through AAI?
 ```
 
-The Agent will list all applications with `aai.json` descriptors installed.
+The Agent will list all AAI-compatible desktop applications installed on your system.
 
 ### Using Tools
 
@@ -128,56 +127,45 @@ AAI protects you with two authorization layers:
 
 ### Managing Consents
 
-- **View consents**: Check `~/.aai/consents/` for stored consent decisions
-- **Revoke consents**: Delete the consent file or use the Gateway UI
+- **View/revoke consents**: Use the Gateway UI to review and manage your consent decisions
 - **Per-tool granularity**: You can authorize individual tools or all tools from an app
+- **Secure storage**: All consent decisions are stored encrypted in the OS Keychain — never in plaintext files
 
 ### For Web Apps
 
 When connecting to a Web App for the first time:
 
-1. Gateway shows domain and SSL certificate info
-2. You verify it's the correct service
-3. OAuth flow opens in your browser
-4. You authorize the specific permissions requested
+1. Gateway shows the app name and tool list it has been authorized to use
+2. An OAuth flow opens in your browser
+3. You authorize the specific permissions requested
 
-## Installing App Descriptors
+Tokens are stored securely in the OS Keychain. Subsequent sessions reuse the cached token automatically.
 
-### Desktop Apps
+## How Desktop App Descriptors Work
 
-App descriptors go in `~/.aai/<appId>/aai.json`:
+AAI-compatible desktop apps bundle their descriptor (`aai.json`) inside the app itself. Gateway discovers them automatically by scanning `/Applications/` on startup — no manual installation needed.
 
-```bash
-# Example: Install a descriptor for a custom app
-mkdir -p ~/.aai/com.mycompany.myapp
-cp myapp-aai.json ~/.aai/com.mycompany.myapp/aai.json
-```
-
-Many apps may ship with their own descriptors that install automatically.
-
-### Web Apps
-
-Web Apps are discovered through the AAI Registry—no manual installation needed. Just ask your Agent to use a Web service, and it will discover available tools.
+When you install an app that supports AAI, it becomes immediately available to your Agent. When you uninstall the app, it disappears from the Agent's view.
 
 ## Troubleshooting
 
 ### Agent can't find any apps
 
 - Verify Gateway is running: Check your Agent's MCP connection
-- Check descriptors exist: `ls ~/.aai/*/aai.json`
+- Check that AAI-compatible apps are installed in `/Applications/` or `~/Applications/`
 
 ### Consent prompt not appearing
 
 - Gateway may be configured for auto-approval (not recommended)
-- Check consent files in `~/.aai/consents/`
+- Use the Gateway UI to review existing consent decisions
 
 ### Web App authorization fails
 
 - Verify your internet connection
 - Check that the service's OAuth is working
-- Try revoking and re-authorizing
+- Try revoking and re-authorizing via the Gateway UI
 
 ## Getting Help
 
-- **GitHub Issues**: [github.com/gybob/aai-protocol/issues](https://github.com/gybob/aai-protocol/issues)
+- **GitHub Issues**: [github.com/gybob/aai-gateway/issues](https://github.com/gybob/aai-gateway/issues)
 - **Documentation**: Browse the [Protocol](/) section for technical details

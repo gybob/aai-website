@@ -76,12 +76,15 @@ NSAppleEventManager.shared().setEventHandler(
 }
 ```
 
-3. **Install descriptor**:
+3. **Bundle the descriptor in your app**:
 
-```bash
-# Your app should create this on first launch
-~/.aai/com.yourcompany.yourapp/aai.json
+Add `aai.json` to your Xcode project as a Bundle Resource. It will be placed at:
+
 ```
+YourApp.app/Contents/Resources/aai.json
+```
+
+Gateway discovers it automatically by scanning `/Applications/` on startup. No runtime installation code needed.
 
 ### Web Apps
 
@@ -128,13 +131,7 @@ NSAppleEventManager.shared().setEventHandler(
 https://yourcompany.com/.well-known/aai.json
 ```
 
-3. **Register with AAI Registry**:
-
-```bash
-curl -X POST https://registry.aai-protocol.org/apps \
-  -H "Content-Type: application/json" \
-  -d '{"app_id": "com.yourcompany.api", "descriptor_url": "https://yourcompany.com/.well-known/aai.json"}'
-```
+That's all. No registration with any external service is needed. Gateway fetches your descriptor automatically when an agent needs to use your app.
 
 ## aai.json Reference
 
@@ -146,7 +143,7 @@ curl -X POST https://registry.aai-protocol.org/apps \
 | `version` | string | Yes | Descriptor version (semver) |
 | `platform` | string | Yes | `macos`, `web`, `linux`, `windows` |
 | `app` | object | Yes | App metadata |
-| `execution` | object | Yes | Execution config |
+| `execution` | object | No | Execution config |
 | `auth` | object | No | OAuth config (web only) |
 | `tools` | array | Yes | Tool definitions |
 
@@ -176,7 +173,6 @@ See the full [aai.json Descriptor](/protocol/aai-json) specification.
 - OAuth 2.1 integration
 - Token endpoint implementation
 - API endpoint mapping
-- Registering with AAI Registry
 
 ## Security Considerations
 

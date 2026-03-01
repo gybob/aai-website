@@ -59,8 +59,8 @@ Contribute to the AAI Gateway reference implementation or build your own gateway
 
 ```bash
 # Clone the repository
-git clone https://github.com/gybob/aai-protocol.git
-cd aai-protocol
+git clone https://github.com/gybob/aai-gateway.git
+cd aai-gateway
 
 # Install dependencies
 npm install
@@ -241,7 +241,7 @@ npm run typecheck
 ## Project Structure
 
 ```
-aai-protocol/
+aai-gateway/
 ├── src/
 │   ├── index.ts           # Entry point
 │   ├── server/            # MCP server
@@ -285,4 +285,4 @@ aai-protocol/
 
 - [Protocol Specification](/)
 - [MCP Documentation](https://modelcontextprotocol.io/)
-- [GitHub Issues](https://github.com/gybob/aai-protocol/issues)
+- [GitHub Issues](https://github.com/gybob/aai-gateway/issues)
