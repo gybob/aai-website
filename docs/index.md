@@ -102,6 +102,11 @@ With AAI, users delegate daily work to AI Agents instead of operating applicatio
 
 Both humans (via GUI) and Agents (via AAI) access the same core application logic. Neither interferes with the other.
 
+## Contact
+
+gybeml@gmail.com
+
+
 ## License
 
 Apache 2.0
