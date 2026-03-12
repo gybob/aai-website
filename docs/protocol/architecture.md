@@ -6,51 +6,7 @@ title: "System Architecture"
 
 ## Architecture Overview
 
-```mermaid
-flowchart TB
-    subgraph Agent["LLM Agent"]
-        A1[Claude / OpenClaw / etc]
-    end
-
-    subgraph Gateway["AAI Gateway (stdio MCP Server)"]
-        G1["MCP Interface<br/>resources/list, resources/read<br/>tools/call"]
-        G2["Descriptor Parser<br/>JSON Schema validation"]
-        G3["Consent Manager<br/>Per-tool authorization"]
-        G4["Execution Layer"]
-        G5["Local Cache<br/>Web descriptors + Name mappings"]
-
-        subgraph G4["Execution Layer"]
-            E1["macOS Executor<br/>JSON over Apple Events"]
-            E2["Web Executor<br/>JSON over HTTP"]
-            E3["..."]
-        end
-
-        G1 --> G2 --> G3 --> G4
-        G1 <--> G5
-    end
-
-    subgraph User["User"]
-        U1["Consent UI"]
-    end
-
-    subgraph Apps["Applications"]
-        D1["macOS App<br/>Apple Events + Bundle aai.json"]
-        W1["Web App<br/>HTTP API + .well-known/aai.json"]
-        X1["..."]
-    end
-
-    Agent -->|"MCP over Stdio (JSON-RPC)"| G1
-    G3 -->|"Request consent"| U1
-    U1 -->|"Grant/Deny"| G3
-    E1 -->|"Apple Events"| D1
-    E2 -->|"HTTPS"| W1
-    G5 <-->|"Fetch on demand"| W1
-
-    style Agent fill:#e1f5fe
-    style Gateway fill:#fff3e0
-    style Apps fill:#e8f5e9
-    style User fill:#fce4ec
-```
+![AAI Protocol Architecture](../images/architecture.png)
 
 ## Core Design Principles
 
@@ -76,9 +32,10 @@ Gateway uses platform-specific executors:
 | Platform | Transport | App Authorization |
 |----------|-----------|-------------------|
 | macOS | JSON over Apple Events | Operating System |
+| Linux | JSON over DBus | Operating System |
+| Windows | JSON over COM | Operating System |
 | web | JSON over HTTPS | OAuth 2.1 |
-| linux | JSON over IPC (TBD) | Operating System |
-| windows | JSON over IPC (TBD) | Operating System |
+| local adapters | JSON over stdio | Adapter-defined |
 
 ### 4. Zero-Install Gateway
 
@@ -92,6 +49,9 @@ Desktop apps:
 2. Agent → resources/list    → Gateway returns discovered desktop apps
 3. Agent → resources/read    → Gateway returns app descriptor
 4. Agent → tools/call        → Gateway checks consent → Apple Events → returns result
+
+Local adapters:
+1. Agent → tools/call        → Gateway checks consent → stdio JSON request → returns result
 
 Web apps:
 1. Agent → resources/read("https://notion.so")
