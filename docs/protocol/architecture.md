@@ -6,7 +6,7 @@ title: "System Architecture"
 
 ## Architecture Overview
 
-![AAI Protocol Architecture](../images/architecture.png)
+![AAI Protocol Architecture](/architecture.png)
 
 ## Core Design Principles
 
