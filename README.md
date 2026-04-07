@@ -8,4 +8,4 @@ All future development and documentation lives there.
 
 ## License
 
-MIT
+Apache 2.0
