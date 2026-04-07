@@ -1,5 +1,0 @@
-/* Fix mermaid node text clipping: foreignObject height is sometimes
-   underestimated, causing the last line to be hidden. */
-.vp-doc .mermaid foreignObject {
-  overflow: visible !important;
-}
